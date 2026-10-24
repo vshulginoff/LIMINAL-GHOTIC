@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="ru">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>Лиминал Готик Лабиринт Снов</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://yandex.ru/games/sdk/v2"></script>
+  <script src="three.min.js"></script>
+
   <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
     (function(m,e,t,r,i,k,a){
@@ -14,19 +21,14 @@
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/113766809" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-  <title>Лиминал Готик Лабиринт Снов</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://yandex.ru/games/sdk/v2"></script>
-  <script src="three.min.js"></script>
+
 </head>
 <body>
-  <!-- Невидимая зона в правом верхнем углу для открытия Дебага по 3 нажатиям -->
-  <div id="secret-debug-trigger" aria-hidden="true"></div>
-
   <!-- ГЛАВНОЕ МЕНЮ (используется и при старте, и на паузе) -->
   <div id="start-screen" class="full-screen-overlay">
+    <!-- Невидимая зона в правом верхнем углу (активна только когда открыто меню/пауза) -->
+    <div id="secret-debug-trigger" aria-hidden="true"></div>
+
     <h1 id="title-text" class="plate-title">Лиминал Готик Лабиринт Снов</h1>
 
     <div id="leaderboard" class="plate-panel">
@@ -70,7 +72,7 @@
     </div>
   </div>
 
-  <!-- ДЕБАГ МЕНЮ И ЛОГИ (открывается по 3 тапам в правом верхнем углу или F2) -->
+  <!-- ДЕБАГ МЕНЮ И ЛОГИ (открывается по 3 тапам в правом верхнем углу меню или F2) -->
   <div id="debug-screen" class="full-screen-overlay" style="display:none">
     <h1 class="plate-title">ДЕБАГ И ЛОГИ</h1>
     <div class="debug-panel plate-panel">
