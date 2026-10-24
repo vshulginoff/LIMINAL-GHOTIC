@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>Лиминал Готик Лабиринт Снов</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://yandex.ru/games/sdk/v2"></script>
+  <script src="three.min.js"></script>
+</head>
+<body>
+  <!-- Невидимая зона в правом верхнем углу для открытия Дебага по 3 нажатиям -->
+  <div id="secret-debug-trigger" aria-hidden="true"></div>
+
+  <!-- ГЛАВНОЕ МЕНЮ (используется и при старте, и на паузе) -->
+  <div id="start-screen" class="full-screen-overlay">
+    <h1 id="title-text" class="plate-title">Лиминал Готик Лабиринт Снов</h1>
+
+    <div id="leaderboard" class="plate-panel">
+      <h3 id="lb-title">РЕКОРДЫ</h3>
+      <ul id="score-list"><li>...</li></ul>
+    </div>
+    <div id="status-text">...</div>
+
+    <div class="menu-stack">
+      <button class="menu-main-btn plate-btn" id="continue-btn" type="button" style="display:none">[ ПРОДОЛЖИТЬ ]</button>
+      <button class="menu-main-btn blink plate-btn" id="start-btn" type="button">[ ЗАГРУЗКА... ]</button>
+      <button class="menu-main-btn plate-btn" id="settings-btn" type="button">[ НАСТРОЙКИ ]</button>
+      <button class="menu-main-btn plate-btn" id="lang-btn" type="button">[ ЯЗЫК: РУССКИЙ ]</button>
+    </div>
+  </div>
+
+  <!-- ОКНО НАСТРОЙКИ -->
+  <div id="settings-screen" class="full-screen-overlay" style="display:none">
+    <h1 id="settings-title" class="plate-title">НАСТРОЙКИ</h1>
+
+    <div class="sound-box plate-panel">
+      <div class="sound-row">
+        <span id="lbl-bgm">Музыка</span>
+        <input type="range" class="vol-bgm" min="0" max="100" value="35">
+      </div>
+      <div class="sound-row">
+        <span id="lbl-sfx">Звуки</span>
+        <input type="range" class="vol-sfx" min="0" max="100" value="70">
+      </div>
+      <div class="sound-row">
+        <span id="lbl-vo">Голос</span>
+        <input type="range" class="vol-vo" min="0" max="100" value="95">
+      </div>
+    </div>
+
+    <button id="motion-toggle" class="menu-main-btn plate-btn" type="button"></button>
+    <p id="control-help" class="plate-hud"></p>
+
+    <div class="menu-stack">
+      <button id="settings-back-btn" class="menu-main-btn plate-btn" type="button">[ НАЗАД ]</button>
+    </div>
+  </div>
+
+  <!-- ДЕБАГ МЕНЮ И ЛОГИ (открывается по 3 тапам в правом верхнем углу или F2) -->
+  <div id="debug-screen" class="full-screen-overlay" style="display:none">
+    <h1 class="plate-title">ДЕБАГ И ЛОГИ</h1>
+    <div class="debug-panel plate-panel">
+      <div class="debug-controls">
+        <label>Уровень (сложность 1–15):
+          <input type="number" id="dbg-level" min="1" max="15" value="1">
+        </label>
+        <button id="dbg-apply-lvl" class="plate-btn small-btn" type="button">Применить УР</button>
+      </div>
+      <div class="debug-controls">
+        <label>Множитель скорости врагов:
+          <select id="dbg-speed-mult">
+            <option value="0.5">0.5x (Медленно)</option>
+            <option value="1" selected>1.0x (Стандарт)</option>
+            <option value="1.3">1.3x (Быстро)</option>
+            <option value="0">0x (Заморозить врагов)</option>
+          </select>
+        </label>
+        <label>Лимит FPS:
+          <select id="dbg-fps">
+            <option value="30" selected>30 FPS (Стабильно)</option>
+            <option value="60">60 FPS</option>
+          </select>
+        </label>
+      </div>
+      <div class="debug-controls">
+        <input type="text" id="dbg-custom-msg" placeholder="Опишите ошибку или заметку...">
+        <button id="dbg-add-msg" class="plate-btn small-btn" type="button">Записать в лог</button>
+      </div>
+      <textarea id="dbg-log-view" readonly></textarea>
+      <div class="menu-row">
+        <button id="dbg-download" class="plate-btn small-btn" type="button">Скачать .txt</button>
+        <button id="dbg-clear" class="plate-btn small-btn" type="button">Очистить</button>
+        <button id="dbg-close" class="plate-btn small-btn" type="button">[ ЗАКРЫТЬ ]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН ОКОНЧАНИЯ ИГРЫ -->
+  <div id="game-over-screen" class="full-screen-overlay">
+    <h1 id="died-text" class="plate-title" style="color:#fff">ПОПЫТКА ОКОНЧЕНА</h1>
+    <p id="score-text" class="plate-hud">СЧЁТ</p>
+    <div class="big-score plate-hud" id="final-score">0</div>
+    <button class="menu-main-btn blink plate-btn" id="restart-btn" type="button">[ МЕНЮ ]</button>
+  </div>
+
+  <div id="fx-flash"></div>
+  <div id="fx-text" class="plate-popup" role="status" aria-live="polite"></div>
+  <div id="game-container"></div>
+
+  <!-- ИГРОВОЙ ИНТЕРФЕЙС (HUD) -->
+  <div id="ui-layer">
+    <div id="vignette"></div>
+    <div class="hud-top">
+      <div class="plate-hud"><span id="txt-lvl">УР</span>: <span id="ui-level">1</span></div>
+      <div class="plate-hud hud-score"><span id="txt-pts">ОЧК</span>: <span id="ui-score">0</span></div>
+      <div class="plate-hud">HP: <span id="ui-lives">3</span></div>
+      <button id="hud-pause-btn" class="plate-btn hud-btn" type="button" aria-label="Пауза">II</button>
+    </div>
+    <div id="dpad">
+      <button data-action="forward">▲</button>
+      <button data-action="left">↶</button>
+      <button data-action="right">↷</button>
+      <button data-action="back">▼</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

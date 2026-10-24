@@ -1,0 +1,225 @@
+:root {
+  --plate-title: url('assets/img/ui_hud.png');
+  --plate-panel: url('assets/img/ui_panel.png');
+  --plate-btn:   url('assets/img/ui_btn.png');
+  --plate-hud:   url('assets/img/ui_hud.png');
+  --plate-popup: url('assets/img/ui_popup.png');
+}
+
+* { box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; min-width: 0; min-height: 100%;
+  margin: 0; padding: 0; overflow: hidden;
+  background: #000; font-family: "Courier New", monospace; color: #d0a0a0;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none; overscroll-behavior: none;
+}
+body { position: fixed; inset: 0; }
+#game-container, #ui-layer, .full-screen-overlay {
+  position: fixed; inset: 0; width: 100%; height: 100%; min-height: 100dvh;
+}
+#game-container { z-index: 1; }
+#game-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+#ui-layer { z-index: 10; pointer-events: none; display: none; }
+
+/* Невидимая зона 3 нажатий в правом верхнем углу для открытия Дебага */
+#secret-debug-trigger {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 76px;
+  height: 76px;
+  z-index: 1005;
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* Растровые PNG-плашки под текстовые блоки */
+.plate-title {
+  background-image: var(--plate-title);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 14px 28px;
+}
+.plate-panel {
+  background-image: var(--plate-panel);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.plate-btn {
+  background-image: var(--plate-btn);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.plate-hud {
+  background-image: var(--plate-hud);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 6px 14px;
+}
+.plate-popup {
+  background-image: var(--plate-popup);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 10px 24px;
+}
+
+.hud-top {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  font-size: clamp(12px, 2.5vw, 18px); font-weight: bold;
+  text-shadow: 2px 2px 4px #000; pointer-events: none; white-space: nowrap;
+}
+.hud-score { color: #ffbd77; }
+.hud-btn {
+  pointer-events: auto;
+  color: #ffe0bd;
+  border: none;
+  background-color: transparent;
+  font: bold 16px monospace;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+#vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle, transparent 50%, #000 150%);
+  z-index: 5; opacity: .35; pointer-events: none;
+}
+#dpad {
+  position: absolute; left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(3, clamp(40px, 10vmin, 64px));
+  grid-template-rows: repeat(3, clamp(40px, 10vmin, 64px));
+  gap: 5px; pointer-events: auto; z-index: 100;
+}
+#dpad button {
+  border: none; border-radius: 8px;
+  background-color: transparent;
+  background-image: var(--plate-btn);
+  background-size: 100% 100%;
+  color: #ffe0bd; font: 26px monospace; touch-action: none;
+}
+#dpad button:active, #dpad button.held { filter: brightness(1.35); }
+#dpad button[data-action="forward"] { grid-area: 1/2; }
+#dpad button[data-action="left"] { grid-area: 2/1; }
+#dpad button[data-action="right"] { grid-area: 2/3; }
+#dpad button[data-action="back"] { grid-area: 3/2; }
+
+#control-help { font-size: 12px; max-width: 360px; padding: 12px 18px; color: #c5abab; margin: 12px 0; }
+.full-screen-overlay {
+  background: rgba(12, 9, 14, .92); z-index: 999;
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: center; text-align: center; pointer-events: auto;
+  overflow-y: auto; min-height: 0;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+#game-over-screen { display: none; }
+h1 {
+  margin: 0 0 12px; font-size: clamp(16px, 4.8vw, 26px);
+  color: #ffe0bd; letter-spacing: 2px; text-shadow: 0 2px 10px #000;
+  max-width: min(520px, calc(100vw - 24px)); overflow-wrap: anywhere;
+}
+
+/* Минималистичный стек кнопок меню */
+.menu-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  width: min(280px, calc(100vw - 40px));
+}
+.menu-main-btn {
+  width: 100%;
+  font: bold clamp(14px, 3.6vw, 18px) "Courier New", monospace;
+  color: #fff;
+  background-color: transparent;
+  border: none;
+  padding: 14px 20px;
+  cursor: pointer;
+  text-shadow: 0 2px 4px #000;
+}
+.menu-main-btn:hover { filter: brightness(1.2); }
+
+.blink {
+  animation: blink 2s infinite ease-in-out;
+  text-decoration: underline;
+}
+@keyframes blink { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+
+#leaderboard {
+  margin-top: 6px; padding: 14px 18px;
+  width: min(290px, calc(100vw - 32px)); min-height: 90px;
+}
+#lb-title { color: #b5a0a0; margin: 0 0 6px; font-size: 14px; border-bottom: 1px solid #443333; }
+#score-list { list-style: none; padding: 0; margin: 0; font-size: 13px; color: #ccc; text-align: left; }
+#score-list li {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 2px;
+}
+#score-list li span { color: #ffbd77; flex: none; }
+
+/* Блок настроек звука */
+.sound-box {
+  margin: 8px 0 12px; padding: 14px 18px;
+  width: min(290px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 10px;
+}
+.sound-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: #e0d0d0; gap: 10px;
+}
+.sound-row input[type="range"] { flex: 1; accent-color: #65b891; cursor: pointer; }
+
+.menu-row {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px;
+}
+.small-btn {
+  font: 12px monospace; color: #ffe0bd; border: none;
+  background-color: transparent; padding: 9px 14px; cursor: pointer;
+}
+.small-btn:hover { filter: brightness(1.2); }
+
+/* Дебаг-панель */
+.debug-panel {
+  width: min(520px, calc(100vw - 24px));
+  padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  font-size: 12px; text-align: left;
+}
+.debug-controls {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
+}
+.debug-controls input[type="number"],
+.debug-controls select,
+.debug-controls input[type="text"] {
+  background: #12181b; color: #91ffb0; border: 1px solid #456;
+  padding: 5px 8px; font: 12px monospace;
+}
+.debug-controls input[type="text"] { flex: 1; min-width: 160px; }
+#dbg-log-view {
+  width: 100%; height: 150px; background: #0a0e10; color: #8ce89b;
+  border: 1px solid #334854; padding: 8px; font: 11px monospace;
+  resize: none; user-select: text; -webkit-user-select: text;
+}
+
+.big-score { font-size: clamp(32px, 10vw, 46px); color: #fff; margin: 10px 0; text-shadow: 0 0 20px red; }
+#status-text { font-size: 10px; margin-top: 4px; color: #777; }
+
+#fx-flash { position: fixed; inset: 0; z-index: 12; pointer-events: none; opacity: 0; }
+#fx-text {
+  position: fixed; left: 50%; top: 36%; z-index: 1001;
+  pointer-events: none; text-align: center; white-space: pre-line;
+  font-weight: bold; font-size: clamp(20px, 5vw, 38px);
+  text-shadow: 0 2px 6px #000; opacity: 0; max-width: 90vw;
+}
