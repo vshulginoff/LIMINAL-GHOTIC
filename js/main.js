@@ -453,17 +453,29 @@ function bindUIEvents() {
     updateMotionLabel();
   });
 
-  $('hud-pause-btn').addEventListener('click', () => togglePause(true));
+  // Мгновенное срабатывание кнопки паузы (и по pointerdown, и по click для iframe ВК)
+  const pauseBtn = $('hud-pause-btn');
+  pauseBtn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    togglePause(true);
+  });
+  pauseBtn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    togglePause(true);
+  });
+
   $('continue-btn').addEventListener('click', () => togglePause(false));
   $('settings-btn').addEventListener('click', openSettings);
   $('settings-back-btn').addEventListener('click', closeSettings);
   $('lang-btn').addEventListener('click', toggleLanguage);
 
-  // Секретный вход в Дебаг-меню по 3 нажатиям в правом верхнем углу экрана
+  // Секретный вход в Дебаг-меню по 3 нажатиям в правом верхнем углу меню
   let secretTapCount = 0;
   let secretTapTimer = null;
-  $('secret-debug-trigger').addEventListener('pointerdown', () => {
-    if (isSimulationActive()) return;
+  $('secret-debug-trigger').addEventListener('pointerdown', e => {
+    e.stopPropagation();
     secretTapCount++;
     if (secretTapTimer) clearTimeout(secretTapTimer);
     if (secretTapCount >= 3) {
